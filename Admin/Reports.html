@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Inventory - Reports & Analytics</title>
+    
+    <!-- Google Fonts: Inter for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Indigo */
+            --secondary-color: #1e293b; /* Dark Slate */
+            --bg-color: #f3f4f6; /* Light Grey Background */
+            --sidebar-width: 260px;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            color: var(--white);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .brand i {
+            color: var(--primary-color);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--white);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+
+        .logout-btn {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logout-btn a {
+            color: #ef4444;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .logout-btn a:hover {
+            color: #dc2626;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* --- Top Navbar --- */
+        .top-navbar {
+            background-color: var(--white);
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 50%;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info h4 {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .profile-info span {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* --- Dashboard Cards --- */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-info h3 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .card-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .bg-blue { background-color: #e0e7ff; color: var(--primary-color); }
+        .bg-green { background-color: #d1fae5; color: var(--success); }
+        .bg-orange { background-color: #ffedd5; color: var(--warning); }
+        .bg-red { background-color: #fee2e2; color: var(--danger); }
+
+        /* --- Filters Section --- */
+        .filters-container {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--text-dark);
+            border: 1px solid #e5e7eb;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        /* --- Charts Section --- */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* --- Tables --- */
+        .table-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        td {
+            padding: 15px 20px;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #f9fafb;
+        }
+
+        /* Status Badges */
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.in-stock { background-color: #d1fae5; color: #065f46; }
+        .status.low-stock { background-color: #ffedd5; color: #9a3412; }
+        .status.out-stock { background-color: #fee2e2; color: #991b1b; }
+        
+        .status.completed { background-color: #d1fae5; color: #065f46; }
+        .status.pending { background-color: #ffedd5; color: #9a3412; }
+        .status.processing { background-color: #e0e7ff; color: #3730a3; }
+
+        /* --- Activity Log --- */
+        .activity-log {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .activity-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e0e7ff;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .activity-content {
+            flex-grow: 1;
+        }
+
+        .activity-content p {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .activity-content span {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .top-navbar {
+                padding: 15px;
+            }
+            .search-box {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Smart Inventory</span>
+        </div>
+        <ul class="menu">
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-box-open"></i> Inventory
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-cart-shopping"></i> Sales
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-truck-fast"></i> Orders
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-truck-field"></i> Suppliers
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-users"></i> Employees
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link active">
+                    <i class="fa-solid fa-chart-pie"></i> Reports
+                </a>
+                        </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+
+        <div class="logout-btn">
+            <a href="#">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search reports...">
+            </div>
+
+            <div class="nav-icons">
+                <div class="icon-btn">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="badge">4</span>
+                </div>
+
+                <div class="profile">
+                    <img src="https://i.pravatar.cc/100" alt="Profile">
+                    <div class="profile-info">
+                        <h4>Admin User</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- Stats Cards -->
+        <section class="cards-grid">
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>$48,520</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="card-icon bg-blue">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>1,284</h3>
+                    <p>Total Sales</p>
+                </div>
+                <div class="card-icon bg-green">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>856</h3>
+                    <p>Total Orders</p>
+                </div>
+                <div class="card-icon bg-orange">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>320</h3>
+                    <p>Products</p>
+                </div>
+                <div class="card-icon bg-blue">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>27</h3>
+                    <p>Low Stock</p>
+                </div>
+                <div class="card-icon bg-red">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-info">
+                    <h3>$9,820</h3>
+                    <p>Profit</p>
+                </div>
+                <div class="card-icon bg-green">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Filters -->
+        <section class="filters-container">
+
+            <div class="filter-group">
+                <input class="filter-input" type="date">
+                <input class="filter-input" type="date">
+                <select class="filter-input">
+                    <option>Category</option>
+                    <option>Electronics</option>
+                    <option>Clothing</option>
+                    <option>Furniture</option>
+                </select>
+
+                <select class="filter-input">
+                    <option>Sales</option>
+                    <option>High</option>
+                    <option>Medium</option>
+                    <option>Low</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <button class="btn-primary" onclick="downloadReport('PDF')">
+                    <i class="fa-solid fa-file-pdf"></i> Export PDF
+                </button>
+
+                <button class="btn-secondary" onclick="downloadReport('CSV')">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+            </div>
+
+        </section>
+
+
+        <!-- Charts -->
+        <section class="charts-grid">
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+                    <h3>Sales Analytics</h3>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+            </div>
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+                    <h3>Product Performance</h3>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="productChart"></canvas>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Inventory Report Table -->
+        <section class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Laptop</td>
+                        <td>Electronics</td>
+                        <td>52</td>
+                        <td><span class="status in-stock">In Stock</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>Headphones</td>
+                        <td>Electronics</td>
+                        <td>9</td>
+                        <td><span class="status low-stock">Low Stock</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>Office Chair</td>
+                        <td>Furniture</td>
+                        <td>0</td>
+                        <td><span class="status out-stock">Out of Stock</span></td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- Orders & Sales Report -->
+        <section class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>#ORD1021</td>
+                        <td>Rahul Sharma</td>
+                        <td>$220</td>
+                        <td><span class="status completed">Completed</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>#ORD1022</td>
+                        <td>Anita Singh</td>
+                        <td>$95</td>
+                        <td><span class="status pending">Pending</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>#ORD1023</td>
+                        <td>Vikas Patel</td>
+                        <td>$410</td>
+                        <td><span class="status processing">Processing</span></td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- Activity Log -->
+        <section class="activity-log">
+
+            <div class="activity-header">
+                <h3>Recent Activity</h3>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div class="activity-content">
+                    <p>New order placed by Rahul Sharma</p>
+                    <span>10 minutes ago</span>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+                <div class="activity-content">
+                    <p>Inventory updated for Laptop</p>
+                    <span>1 hour ago</span>
+                </div>
+            </div>
+
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="activity-content">
+                    <p>New supplier added</p>
+                    <span>3 hours ago</span>
+                </div>
+            </div>
+
+            <div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-truck"></i>
+    </div>
+    <div class="activity-content">
+        <p>New shipment received from supplier</p>
+        <span>5 hours ago</span>
+    </div>
+</div>
+
+<div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-rotate"></i>
+    </div>
+    <div class="activity-content">
+        <p>Order #ORD1024 was refunded</p>
+        <span>6 hours ago</span>
+    </div>
+</div>
+
+<div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-warehouse"></i>
+    </div>
+    <div class="activity-content">
+        <p>Inventory restocked for Headphones</p>
+        <span>Yesterday</span>
+    </div>
+</div>
+
+<div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-user-plus"></i>
+    </div>
+    <div class="activity-content">
+        <p>New customer account created</p>
+        <span>Yesterday</span>
+    </div>
+</div>
+
+<div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-tag"></i>
+    </div>
+    <div class="activity-content">
+        <p>Discount applied to Electronics category</p>
+        <span>2 days ago</span>
+    </div>
+</div>
+
+<div class="activity-item">
+    <div class="activity-icon">
+        <i class="fa-solid fa-file-invoice"></i>
+    </div>
+    <div class="activity-content">
+        <p>Invoice generated for Order #ORD1025</p>
+        <span>2 days ago</span>
+    </div>
+</div>
+
+        </section>
+
+    </main>
+
+
+<script>
+
+function downloadReport(type){
+    alert("Downloading report as " + type + " (demo)");
+}
+
+/* Sales Chart */
+
+const salesCtx = document.getElementById('salesChart');
+
+new Chart(salesCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+        datasets: [{
+            label: 'Sales',
+            data: [120,190,300,250,420,500],
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79,70,229,0.1)',
+            fill: true,
+            tension:0.4
+        }]
+    },
+    options: {
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+
+/* Product Chart */
+
+const productCtx = document.getElementById('productChart');
+
+new Chart(productCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Laptop','Headphones','Chair','Keyboard'],
+        datasets: [{
+            label:'Units Sold',
+            data:[120,300,80,150],
+            backgroundColor:'#4f46e5'
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false
+    }
+});
+
+</script>
+
+</body>
+</html>
