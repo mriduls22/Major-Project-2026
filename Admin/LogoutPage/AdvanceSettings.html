@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Settings - Smart Inventory</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #1e293b;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 25px 70px rgba(0, 0, 0, 0.2), 0 15px 40px rgba(0, 0, 0, 0.15);
+            --shadow-light: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            z-index: -2;
+            animation: bgShift 20s ease-in-out infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(180deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            align-items: start;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .settings-sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 40px;
+        }
+
+        .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-item {
+            padding: 15px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-color);
+            transform: scaleY(0);
+            transition: var(--transition);
+        }
+
+        .sidebar-item:hover {
+            background: rgba(79, 70, 229, 0.05);
+            transform: translateX(8px);
+            color: var(--primary-color);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(99, 102, 241, 0.05));
+            color: var(--primary-color);
+        }
+
+        .sidebar-item.active::before {
+            transform: scaleY(1);
+        }
+
+        .sidebar-icon {
+            width: 24px;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-dark), #374151);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary-color), #4338ca);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .last-session {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Content Cards */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #667eea, var(--primary-color));
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .content-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow);
+        }
+
+        .content-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .card-primary .card-icon {
+            background: linear-gradient(135deg, var(--primary-color), #667eea);
+        }
+
+        .card-success .card-icon {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        .card-warning .card-icon {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+        }
+
+        .card-danger .card-icon {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid rgba(229, 231, 235, 0.8);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: rgba(229, 231, 235, 0.7);
+            border-radius: 28px;
+            transition: var(--transition);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, var(--primary-color), #667eea);
+        }
+
+        input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 48px;
+        }
+
+        /* Settings List */
+        .settings-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .settings-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .settings-list::-webkit-scrollbar-track {
+            background: rgba(229, 231, 235, 0.5);
+            border-radius: 3px;
+        }
+
+        .settings-list::-webkit-scrollbar-thumb {
+            background: rgba(79, 70, 229, 0.5);
+            border-radius: 3px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            transition: var(--transition);
+        }
+
+        .setting-item:hover {
+            background: white;
+            transform: translateX(5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-info h5 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .setting-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #4338ca);
+            color: white;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-dark);
+            border: 2px solid rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .settings-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .header-section {
+                padding: 30px 25px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .content-card {
+                padding: 25px 20px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="settings-sidebar">
+            <div class="sidebar-title">
+                <i class="fa-solid fa-cog"></i>
+                Post-Logout Options
+            </div>
+            <ul class="sidebar-menu">
+
+    <a href="LogoutSettings.html" style="text-decoration: none; color: inherit;">
+        <li class="sidebar-item">
+            <i class="fa-solid fa-shield-check sidebar-icon"></i>
+            <span>Security Audit</span>
+        </li>
+    </a>
+
+    <a href="SessionHistory.html" style="text-decoration: none; color: inherit;">
+        <li class="sidebar-item">
+            <i class="fa-solid fa-history sidebar-icon"></i>
+            <span>Session History</span>
+        </li>
+    </a>
+
+    <a href="CacheClear.html" style="text-decoration: none; color: inherit;">
+        <li class="sidebar-item">
+            <i class="fa-solid fa-database sidebar-icon"></i>
+            <span>Cache Clear</span>
+        </li>
+    </a>
+
+    <a href="ExportData.html" style="text-decoration: none; color: inherit;">
+        <li class="sidebar-item">
+            <i class="fa-solid fa-download sidebar-icon"></i>
+            <span>Export Data</span>
+        </li>
+    </a>
+
+    <a href="AdvanceSettings.html" style="text-decoration: none; color: inherit;">
+        <li class="sidebar-item active">
+            <i class="fa-solid fa-sliders sidebar-icon"></i>
+            <span>Advanced Settings</span>
+        </li>
+    </a>
+
+</ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header-section">
+                <div class="header-top">
+                    <div class="header-title">
+                        <i class="fa-solid fa-sliders" style="font-size: 2.5rem; color: var(--primary-color);"></i>
+                        <div>
+                            <h1>Advanced Settings</h1>
+                            <p class="last-session">Fine-tune your post-logout behavior • Updated: Today, 3:15 PM</p>
+                        </div>
+                    </div>
+                    <div class="status-badge">
+                        <i class="fa-solid fa-circle-check"></i>
+                        All Settings Active
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Grid -->
+            <section class="content-grid">
+
+                <!-- General Settings -->
+                <div class="content-card card-primary">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-gear"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">General Settings</div>
+                            <div class="card-subtitle">Basic configuration options</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Session Timeout (minutes)</label>
+                        <input type="number" class="form-input" value="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Auto Logout Warning</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                            <span>Enable warning before logout</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Default Language</label>
+                        <div class="select-wrapper">
+                            <select class="form-input form-select">
+                                <option>English</option>
+                                <option>Hindi</option>
+                                <option>Punjabi</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="content-card card-success">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">Security Settings</div>
+                            <div class="card-subtitle">Manage account security options</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Two-Factor Authentication</h5>
+                                <div class="setting-desc">Add extra layer of security</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Login Alerts</h5>
+                                <div class="setting-desc">Notify on new device login</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Auto Session Termination</h5>
+                                <div class="setting-desc">End inactive sessions automatically</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Settings -->
+                <div class="content-card card-warning">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">Performance Settings</div>
+                            <div class="card-subtitle">Optimize system performance</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Auto Cache Clear</h5>
+                                <div class="setting-desc">Clear cache after logout</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Background Sync</h5>
+                                <div class="setting-desc">Sync data in background</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="content-card card-danger full-width">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">Danger Zone</div>
+                            <div class="card-subtitle">Irreversible actions</div>
+                        </div>
+                    </div>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Reset All Settings</h5>
+                                <div class="setting-desc">Restore default configuration</div>
+                            </div>
+                            <button class="btn btn-secondary">
+                                <i class="fa-solid fa-rotate"></i>
+                                Reset
+                            </button>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h5>Delete All Data</h5>
+                                <div class="setting-desc">Remove all stored data permanently</div>
+                            </div>
+                            <button class="btn btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i>
+                            Save Changes
+                        </button>
+
+                        <button class="btn btn-secondary">
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancel
+                        </button>
+
+                        <button class="btn btn-success">
+                            <i class="fa-solid fa-check"></i>
+                            Apply Settings
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+</body>
+</html>
