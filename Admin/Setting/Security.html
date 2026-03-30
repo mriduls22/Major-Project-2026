@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Inventory - Security Settings</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #1e293b;
+            --bg-color: #f3f4f6;
+            --sidebar-width: 260px;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-color);
+            color: var(--white);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .brand {
+            padding: 20px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .brand i {
+            color: var(--primary-color);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .menu-link:hover, .menu-link.active {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--white);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .menu-link i {
+            width: 25px;
+            margin-right: 10px;
+        }
+
+        .logout-btn {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logout-btn a {
+            color: #ef4444;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .logout-btn a:hover {
+            color: #dc2626;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        /* --- Top Navbar --- */
+        .top-navbar {
+            background-color: var(--white);
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 50%;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info h4 {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .profile-info span {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* --- Settings Page Specific Styles --- */
+        .settings-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        .settings-sidebar {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .settings-nav {
+            list-style: none;
+        }
+
+        .settings-nav li {
+            margin-bottom: 5px;
+        }
+
+        .settings-nav a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .settings-nav a:hover {
+            background-color: #f3f4f6;
+            color: var(--primary-color);
+        }
+
+        .settings-nav a.active {
+            background-color: #e0e7ff;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .settings-nav a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .settings-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .settings-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        .card-header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .card-header p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .toggle-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-text h4 {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+        }
+
+        .toggle-text p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #fecaca;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Activity Table */
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .activity-table th {
+            text-align: left;
+            padding: 10px 15px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .activity-table td {
+            padding: 12px 15px;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .activity-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-dot.active { background-color: var(--success); }
+        .status-dot.inactive { background-color: var(--text-light); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+            .settings-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .top-navbar {
+                padding: 15px;
+            }
+            .search-box {
+                display: none;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Smart Inventory</span>
+        </div>
+        <ul class="menu">
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-box-open"></i> Inventory
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-cart-shopping"></i> Sales
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-truck-fast"></i> Orders
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-users"></i> Suppliers
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-chart-pie"></i> Reports
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" class="menu-link">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+
+        <div class="logout-btn">
+            <a href="#">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search settings...">
+            </div>
+
+                        <div class="nav-icons">
+                <div class="icon-btn">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+
+                <div class="profile">
+                    <img src="https://i.pravatar.cc/40" alt="profile">
+                    <div class="profile-info">
+                        <h4>Admin</h4>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- Settings Container -->
+        <div class="settings-container">
+
+            <!-- Settings Sidebar -->
+            <div class="settings-sidebar">
+                <ul class="settings-nav">
+                    <li><a href="#"><i class="fa-solid fa-user"></i> Profile</a></li>
+                    <li><a href="#"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+                    <li><a href="#" class="active"><i class="fa-solid fa-shield-halved"></i> Security</a></li>
+                    <li><a href="#"><i class="fa-solid fa-palette"></i> Appearance</a></li>
+                    <li><a href="#"><i class="fa-solid fa-database"></i> System</a></li>
+                </ul>
+            </div>
+
+
+            <!-- Settings Content -->
+            <div class="settings-content">
+
+                <!-- Change Password -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Change Password</h2>
+                        <p>Update your account password to keep your account secure.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Current Password</label>
+                            <input type="password">
+                        </div>
+
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password">
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i> Update Password
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Two Factor Authentication -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Two-Factor Authentication</h2>
+                        <p>Add an extra layer of security to your account.</p>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-text">
+                            <h4>Enable 2FA</h4>
+                            <p>Require verification code during login.</p>
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-secondary">
+                            <i class="fa-solid fa-qrcode"></i> Setup Authenticator
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Login Activity -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Recent Login Activity</h2>
+                        <p>Review your recent login sessions.</p>
+                    </div>
+
+                    <table class="activity-table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Location</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>Chrome - Windows</td>
+                                <td>Delhi, India</td>
+                                <td>Today 10:30 AM</td>
+                                <td><span class="status-dot active"></span>Active</td>
+                            </tr>
+
+                            <tr>
+                                <td>Safari - iPhone</td>
+                                <td>Mumbai, India</td>
+                                <td>Yesterday 8:20 PM</td>
+                                <td><span class="status-dot inactive"></span>Logged Out</td>
+                            </tr>
+
+                            <tr>
+                                <td>Edge - Laptop</td>
+                                <td>Bangalore, India</td>
+                                <td>2 days ago</td>
+                                <td><span class="status-dot inactive"></span>Logged Out</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <!-- Session Management -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Session Management</h2>
+                        <p>Manage devices currently logged into your account.</p>
+                    </div>
+
+                    <table class="activity-table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Location</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>Chrome - Windows</td>
+                                <td>Delhi</td>
+                                <td>
+                                    <button class="btn btn-danger">Terminate</button>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>iPhone App</td>
+                                <td>Mumbai</td>
+                                <td>
+                                    <button class="btn btn-danger">Terminate</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="btn-group">
+                        <button class="btn btn-danger">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout From All Devices
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Security Notifications -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <h2>Security Notifications</h2>
+                        <p>Receive alerts when important security events occur.</p>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-text">
+                            <h4>New Login Alert</h4>
+                            <p>Notify when a new device logs in.</p>
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-item">
+                        <div class="toggle-text">
+                            <h4>Password Change Alert</h4>
+                            <p>Notify when your password is updated.</p>
+                        </div>
+
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+</html>
